@@ -4,6 +4,7 @@ DISASM_LIB = $(DISASM_LIBDIR)/libbddisasm.a
 
 CFLAGS = -g -Og -Wall -Werror=return-type
 CFLAGS += -I$(DISASM_DIR)/inc
+CFLAGS += -MD -MP
 
 LDFLAGS += -L$(DISASM_LIBDIR)
 LIBS += -lbddisasm
@@ -16,7 +17,15 @@ $(DISASM_LIB):
 	@echo "\\$$ make -C bddisasm"
 	exit 1
 
-segvign: $(DISASM_LIB)
 
-%: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)
+SRCS = segvign.c nextinst.c
+OBJS = $(SRCS:.c=.o)
+DEPS = $(OBJS:.o=.d)
+
+segvign: $(OBJS) $(DISASM_LIB)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+clean:
+	rm -f $(OBJS) $(DEPS) segvign
+
+-include $(DEPS)
