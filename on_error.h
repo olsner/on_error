@@ -1,22 +1,20 @@
 #pragma once
 
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ucontext.h>
 
 /**{{*/
 /** Internals used by macros. Don't use directly. */
 extern volatile sig_atomic_t on_error_signal;
 extern ucontext_t on_error_context;
+
 void on_error_setlabel(void* label);
 int on_error_setsig(void);
 int on_error_set_context(void);
 /**}}*/
 
 /**
- * When a segmentation fault happens, continue execution at the next address.
+ * When a segmentation fault happens, resume at the next instruction.
  */
 int on_error_resume_next(void);
 
@@ -44,7 +42,6 @@ int on_error_resume_next(void);
 #define on_error_goto_unsafe(label) do { \
     on_error_setlabel(&&label); \
     /* Trick the compiler into keeping label reachable. */ \
-    /* Needs to be a  */ \
     if (on_error_signal) goto label; \
     on_error_setsig(); \
 } while (0)

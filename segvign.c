@@ -1,11 +1,7 @@
 #include <assert.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ucontext.h>
 
 #include "on_error.h"
 
@@ -36,9 +32,7 @@ static bool test_segfault(void) {
 }
 
 void resume_next_demo(void) {
-    printf("Demo: setting error handling\n");
     on_error_resume_next();
-    printf("Demo: segfaulting\n");
     *(int*)0xdeadbeef = 0xcafebabe;
     printf("Demo: all OK, no segfaults here :)\n");
 }
@@ -76,13 +70,13 @@ error_handler:
 }
 
 int main() {
-    puts("Resume next demo:");
-    resume_next_demo();
-    puts("\nTest: resume next");
+    puts("Test: resume next");
     test_resume_next();
     puts("\nTest: safe(ish) goto");
     test_error_goto();
     puts("\nTest: unsafe goto");
     test_error_goto_unsafe();
     printf("\nTests completed successfully.\n");
+    puts("Demo:");
+    resume_next_demo();
 }

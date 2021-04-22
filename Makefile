@@ -2,7 +2,7 @@ DISASM_DIR = bddisasm
 DISASM_LIBDIR = $(DISASM_DIR)/bin/x64/Release
 DISASM_LIB = $(DISASM_LIBDIR)/libbddisasm.a
 
-CFLAGS = -g -Og -Wall -Werror=return-type
+CFLAGS = -g -Og -Wall -Werror
 CFLAGS += -I$(DISASM_DIR)/inc
 CFLAGS += -MD -MP
 
