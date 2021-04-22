@@ -35,22 +35,31 @@ static bool test_segfault(void) {
     }
 }
 
+void resume_next_demo(void) {
+    printf("Demo: setting error handling\n");
+    on_error_resume_next();
+    printf("Demo: segfaulting\n");
+    *(int*)0xdeadbeef = 0xcafebabe;
+    printf("Demo: all OK, no segfaults here :)\n");
+}
+
+
 void test_resume_next(void) {
-    printf("Testing error_resume_next: should resume\n");
+    printf("Testing on_error_resume_next: should resume\n");
     on_error_resume_next();
     bool resumed = test_segfault();
     assert(resumed);
 }
 
 void test_error_goto(void) {
-    printf("Testing error_goto: should not resume\n");
+    printf("Testing on_error_goto: should not resume\n");
     on_error_goto(error_handler);
     test_segfault();
     assert(false); // should not get here - should go to the error handler instead
     return;
 
 error_handler:
-    printf("error_goto: At error handler as expected.\n");
+    printf("test_error_goto: At error handler as expected.\n");
 }
 
 void test_error_goto_unsafe(void) {
@@ -62,16 +71,18 @@ void test_error_goto_unsafe(void) {
     return;
 
 error_handler:
-    printf("error_goto_unsafe: At error handler as expected.\n");
+    printf("test_error_goto_unsafe: At error handler as expected.\n");
     printf("flag = %d (expect 1234)\n", flag);
 }
 
 int main() {
-    puts("Resume next:");
+    puts("Resume next demo:");
+    resume_next_demo();
+    puts("\nTest: resume next");
     test_resume_next();
-    puts("\nSafe(ish) goto:");
+    puts("\nTest: safe(ish) goto");
     test_error_goto();
-    puts("\nUnsafe goto:");
+    puts("\nTest: unsafe goto");
     test_error_goto_unsafe();
     printf("\nTests completed successfully.\n");
 }
