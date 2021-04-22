@@ -34,7 +34,17 @@ static bool test_segfault(void) {
 void resume_next_demo(void) {
     on_error_resume_next();
     *(int*)0xdeadbeef = 0xcafebabe;
-    printf("Demo: all OK, no segfaults here :)\n");
+    printf("resume_next_demo: All OK, no segfaults here :)\n");
+}
+
+void goto_demo(void) {
+    on_error_goto(fail);
+    *(int*)0xdeadbeef = 0xcafebabe;
+    puts("goto_demo: You should not see this string");
+    return;
+
+fail:
+    puts("goto_demo: Error handler reached, moving on...");
 }
 
 
@@ -79,4 +89,5 @@ int main() {
     printf("\nTests completed successfully.\n");
     puts("Demo:");
     resume_next_demo();
+    goto_demo();
 }
