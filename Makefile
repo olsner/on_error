@@ -18,7 +18,7 @@ $(DISASM_LIB):
 	exit 1
 
 
-SRCS = segvign.c nextinst.c
+SRCS = segvign.c nextinst.c on_error.c
 OBJS = $(SRCS:.c=.o)
 DEPS = $(OBJS:.o=.d)
 

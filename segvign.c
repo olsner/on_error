@@ -1,5 +1,3 @@
-#define _GNU_SOURCE
-
 #include <assert.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -9,7 +7,6 @@
 #include <string.h>
 #include <ucontext.h>
 
-#include "nextinst.h"
 #include "on_error.h"
 
 static void segfault(volatile int* flag) {
@@ -57,9 +54,6 @@ error_handler:
 }
 
 void test_error_goto_unsafe(void) {
-    // Note: only safe for errors in the same stack frame as the function,
-    // otherwise it's as if the called function jumped to the label, then
-    // returns to its caller.
     printf("Testing error_goto_unsafe: should not resume\n");
     on_error_goto_unsafe(error_handler);
     volatile int flag = 0;
@@ -73,8 +67,11 @@ error_handler:
 }
 
 int main() {
+    puts("Resume next:");
     test_resume_next();
+    puts("\nSafe(ish) goto:");
     test_error_goto();
+    puts("\nUnsafe goto:");
     test_error_goto_unsafe();
     printf("\nTests completed successfully.\n");
 }
