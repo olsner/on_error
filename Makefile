@@ -5,27 +5,50 @@ DISASM_LIB = $(DISASM_LIBDIR)/libbddisasm.a
 CFLAGS = -g -Og -Wall -Werror
 CFLAGS += -I$(DISASM_DIR)/inc
 CFLAGS += -MD -MP
+SO_CFLAGS = -fPIC -fvisibility=hidden -fdata-sections -ffunction-sections
+SO_CFLAGS += -DON_ERROR_API='__attribute__((visibility("default")))'
+SO_LDFLAGS = -shared
 
+# Just to make ./segvign_dyn work without LD_LIBRARY_PATH settings...
+LDFLAGS += -Wl,--rpath='$$ORIGIN:'
+LDFLAGS += -Wl,--gc-sections -s
 LDFLAGS += -L$(DISASM_LIBDIR)
 LIBS += -lbddisasm
+LIB = lib_on_error.so
+BINS = segvign segvign_dyn
 
-default: segvign
+default: $(BINS) $(LIB)
 
-$(DISASM_LIB):
+$(DISASM_LIB): export CC := $(CC) $(SO_CFLAGS)
+$(DISASM_LIB): $(DISASM_DIR)
+	make -C $(DISASM_DIR) RELEASE=y VERBOSE=y
+
+$(DISASM_DIR):
 	@echo "Check out and build libbddisasm first."
-	@echo "\\$$ git clone https://github.com/bitdefender/bddisasm"
-	@echo "\\$$ make -C bddisasm"
+	@echo "$$ git clone https://github.com/bitdefender/bddisasm"
 	exit 1
 
-
-SRCS = segvign.c nextinst.c on_error.c
+LIB_SRCS = on_error.c nextinst.c
+BIN_SRCS = segvign.c
+SRCS = $(BIN_SRCS) $(LIB_SRCS)
 OBJS = $(SRCS:.c=.o)
-DEPS = $(OBJS:.o=.d)
+BIN_OBJS = $(BIN_SRCS:.c=.o)
+LIB_OBJS = $(LIB_SRCS:.c=.l.o)
+DEPS = $(OBJS:.o=.d) $(LIB_OBJS:.o=.d)
+
+%.l.o: %.c
+	$(CC) $(CFLAGS) $(SO_CFLAGS) -c -o $@ $<
+
+$(LIB): $(LIB_OBJS) $(DISASM_LIB)
+	$(CC) $(LDFLAGS) $(SO_LDFLAGS) -o $@ $(LIB_OBJS) $(LIBS)
 
 segvign: $(OBJS) $(DISASM_LIB)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
+segvign_dyn: $(BIN_OBJS) $(LIB)
+	$(CC) $(LDFLAGS) -o $@ $^
+
 clean:
-	rm -f $(OBJS) $(DEPS) segvign
+	rm -f $(LIB_OBJS) $(OBJS) $(DEPS) $(BINS) $(LIB)
 
 -include $(DEPS)

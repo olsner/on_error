@@ -5,18 +5,23 @@
 
 /**{{*/
 /** Internals used by macros. Don't use directly. */
-extern volatile sig_atomic_t on_error_signal;
-extern ucontext_t on_error_context;
 
-void on_error_setlabel(void* label);
-int on_error_setsig(void);
-int on_error_set_context(void);
+#ifndef ON_ERROR_API
+#define ON_ERROR_API
+#endif
+
+ON_ERROR_API extern volatile sig_atomic_t on_error_signal;
+ON_ERROR_API extern ucontext_t on_error_context;
+
+ON_ERROR_API extern void on_error_setlabel(void* label);
+ON_ERROR_API extern int on_error_setsig(void);
+ON_ERROR_API extern int on_error_set_context(void);
 /**}}*/
 
 /**
  * When a segmentation fault happens, resume at the next instruction.
  */
-int on_error_resume_next(void);
+ON_ERROR_API extern int on_error_resume_next(void);
 
 /**
  * On error, goto the given label in the current function.

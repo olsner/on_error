@@ -1,3 +1,5 @@
 /segvign
+/segvign_dyn
+*.so
 *.o
 *.d
