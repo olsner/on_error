@@ -11,11 +11,10 @@
 #endif
 
 ON_ERROR_API extern volatile sig_atomic_t on_error_signal;
-ON_ERROR_API extern ucontext_t on_error_context;
 
 ON_ERROR_API extern void on_error_setlabel(void* label);
 ON_ERROR_API extern int on_error_setsig(void);
-ON_ERROR_API extern int on_error_set_context(void);
+ON_ERROR_API extern ucontext_t* on_error_set_context(void);
 /**}}*/
 
 /**
@@ -28,8 +27,7 @@ ON_ERROR_API extern int on_error_resume_next(void);
  * Don't cause any errors after returning, or the program will likely crash.
  */
 #define on_error_goto(label) do { \
-    on_error_set_context(); \
-    getcontext(&on_error_context); \
+    getcontext(on_error_set_context()); \
     if (on_error_signal) { \
         goto label; \
     } \

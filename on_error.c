@@ -13,7 +13,7 @@
 
 void* volatile error_label = ERROR_RESUME_NEXT;
 volatile sig_atomic_t on_error_signal = 0;
-ucontext_t on_error_context;
+static ucontext_t on_error_context;
 
 #define debug_enabled 0
 #define debug(...) do { if (debug_enabled) printf(__VA_ARGS__); } while(0)
@@ -75,9 +75,9 @@ int on_error_resume_next(void) {
     return on_error_setsig();
 }
 
-int on_error_set_context(void) {
+ucontext_t* on_error_set_context(void) {
     debug("ON ERROR SET CONTEXT\n");
     error_label = ERROR_SET_CONTEXT;
     on_error_signal = 0;
-    return on_error_setsig();
+    return on_error_setsig() ? 0 : &on_error_context;
 }
