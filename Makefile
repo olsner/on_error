@@ -15,9 +15,10 @@ LDFLAGS += -Wl,--gc-sections -s
 LDFLAGS += -L$(DISASM_LIBDIR)
 LIBS += -lbddisasm
 LIB = lib_on_error.so
-BINS = segvign segvign_dyn
+LIBNOCRASH = libnocrash.so
+BINS = segvign segvign_dyn crash
 
-default: $(BINS) $(LIB)
+default: $(BINS) $(LIB) $(LIBNOCRASH)
 
 $(DISASM_LIB): export CC := $(CC) $(SO_CFLAGS)
 $(DISASM_LIB): $(DISASM_DIR)
@@ -36,11 +37,16 @@ BIN_OBJS = $(BIN_SRCS:.c=.o)
 LIB_OBJS = $(LIB_SRCS:.c=.l.o)
 DEPS = $(OBJS:.o=.d) $(LIB_OBJS:.o=.d)
 
+NOCRASH_OBJS = libnocrash.l.o
+
 %.l.o: %.c
 	$(CC) $(CFLAGS) $(SO_CFLAGS) -c -o $@ $<
 
 $(LIB): $(LIB_OBJS) $(DISASM_LIB)
 	$(CC) $(LDFLAGS) $(SO_LDFLAGS) -o $@ $(LIB_OBJS) $(LIBS)
+
+$(LIBNOCRASH): $(LIB_OBJS) $(NOCRASH_OBJS) $(DISASM_LIB)
+	$(CC) $(LDFLAGS) $(SO_LDFLAGS) -o $@ $(LIB_OBJS) $(NOCRASH_OBJS) $(LIBS)
 
 segvign: $(OBJS) $(DISASM_LIB)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
@@ -50,5 +56,6 @@ segvign_dyn: $(BIN_OBJS) $(LIB)
 
 clean:
 	rm -f $(LIB_OBJS) $(OBJS) $(DEPS) $(BINS) $(LIB)
+	rm -f $(LIBNOCRASH) $(NOCRASH_OBJS)
 
 -include $(DEPS)

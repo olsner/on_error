@@ -27,6 +27,21 @@ handling:
 Link against `lib_on_error.so` for the runtime functions used by the macros.
 
 
+## `LD_PRELOAD` wrapper
+
+`libnocrash.so` is a self-contained `LD_PRELOAD`-able shared library that calls
+`on_error_resume_next()` when loaded, protecting any process against unwanted
+segmentation faults without requiring any source changes to the application.
+
+This can be loaded manually by setting `LD_PRELOAD` or by using the `nocrash`
+script like so:
+
+    ./nocrash ./crash
+
+(Where crash is a simple test program included in this repo that simply crashes
+directly.)
+
+
 ## License
 
 The code itself is MIT license, but uses bitdefender's bddisasm which is

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+preload=libnocrash.so
+
+if ! [ -f $preload ]; then
+    echo "Can't find libnocrash.so, maybe make the sript more clever"
+    exit 1
+fi
+
+if [ -z "$LD_PRELOAD" ]; then
+    export LD_PRELOAD=$preload
+else
+    export LD_PRELOAD=$preload:$LD_PRELOAD
+fi
+
+exec "$@"
